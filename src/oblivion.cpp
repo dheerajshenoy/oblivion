@@ -1,4 +1,5 @@
 #include "oblivion.hpp"
+#include "qshortcut.h"
 
 Oblivion::Oblivion(QWidget *parent)
 : QMainWindow(parent)
@@ -17,9 +18,12 @@ Oblivion::Oblivion(QWidget *parent)
 
     mLayout->setContentsMargins(0, 0, 0, 0);
     this->setCentralWidget(mWidget);
-    this->show();
 
     mMenuBarSetup();
+    mShortcutsSetup();
+
+    OpenImage("/home/neo/Downloads/wall.png");
+    this->show();
 }
 
 void Oblivion::mMenuBarSetup()
@@ -45,6 +49,16 @@ void Oblivion::mMenuBarSetup()
     mAboutMenu = new QMenu("About");
 
     mMenuBar->addMenu(mAboutMenu);
+}
+
+void Oblivion::mShortcutsSetup()
+{
+    QShortcut
+    *mZoomIn = new QShortcut(QKeySequence("="), this),
+    *mZoomOut = new QShortcut(QKeySequence("-"), this);
+
+    connect(mZoomIn, &QShortcut::activated, this, [&]() { Oblivion::ZoomImage(1.25); });
+    connect(mZoomOut, &QShortcut::activated, this, [&]() { Oblivion::ZoomImage(0.8); });
 }
 
 bool Oblivion::OpenImage(QString filepath)
@@ -83,12 +97,23 @@ bool Oblivion::OpenImage(QString filepath)
             mStatusBar->SetFilePath(fileinfo.filePath());
             mStatusBar->SetFileType(mimetype.name());
             mStatusBar->SetFileSize(fileinfo.size());
+
+            mImg = QImage(filepath);
+            mView->addPixmap(QPixmap::fromImage(mImg));
+
             return true;
         }
         else return false;
     }
 
     return true;
+}
+
+void Oblivion::ZoomImage(float factor)
+{
+    mGlobalFactor *= factor;
+
+    mView->scale(mGlobalFactor, mGlobalFactor);
 }
 
 Oblivion::~Oblivion() {

@@ -15,6 +15,8 @@
 #include <qt6/QtCore/QMimeType>
 
 #include <qt6/QtGui/QImage>
+#include <qt6/QtGui/QShortcut>
+#include <qt6/QtGui/QKeySequence>
 #include <qt6/QtGui/QAction>
 
 
@@ -31,6 +33,7 @@ public:
     ~Oblivion();
 
     bool OpenImage(QString filepath = "");
+    void ZoomImage(float factor);
 
 private:
     QWidget *mWidget;
@@ -47,8 +50,11 @@ private:
 
 
     void mMenuBarSetup();
+    void mShortcutsSetup();
 
     QImage mImg;
+
+    float mGlobalFactor = 1.0f;
 
     GView *mView;
 };
