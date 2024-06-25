@@ -54,10 +54,14 @@ OBJECTS_DIR   = ./
 
 SOURCES       = src/main.cpp \
 		src/oblivion.cpp \
-		src/utils.cpp 
+		src/utils.cpp \
+		src/gview.cpp \
+		src/statusbar.cpp 
 OBJECTS       = main.o \
 		oblivion.o \
-		utils.o
+		utils.o \
+		gview.o \
+		statusbar.o
 DIST          = /usr/lib/qt6/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt6/mkspecs/common/unix.conf \
 		/usr/lib/qt6/mkspecs/common/linux.conf \
@@ -262,9 +266,13 @@ DIST          = /usr/lib/qt6/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt6/mkspecs/features/yacc.prf \
 		/usr/lib/qt6/mkspecs/features/lex.prf \
 		oblivion.pro src/oblivion.hpp \
-		src/utils.hpp src/main.cpp \
+		src/utils.hpp \
+		src/gview.hpp \
+		src/statusbar.hpp src/main.cpp \
 		src/oblivion.cpp \
-		src/utils.cpp
+		src/utils.cpp \
+		src/gview.cpp \
+		src/statusbar.cpp
 QMAKE_TARGET  = oblivion
 DESTDIR       = 
 TARGET        = oblivion
@@ -706,8 +714,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt6/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/oblivion.hpp src/utils.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/main.cpp src/oblivion.cpp src/utils.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/oblivion.hpp src/utils.hpp src/gview.hpp src/statusbar.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/main.cpp src/oblivion.cpp src/utils.cpp src/gview.cpp src/statusbar.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -757,14 +765,22 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
-main.o: src/main.cpp src/oblivion.hpp
+main.o: src/main.cpp src/oblivion.hpp \
+		src/gview.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o src/main.cpp
 
-oblivion.o: src/oblivion.cpp src/oblivion.hpp
+oblivion.o: src/oblivion.cpp src/oblivion.hpp \
+		src/gview.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o oblivion.o src/oblivion.cpp
 
 utils.o: src/utils.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o utils.o src/utils.cpp
+
+gview.o: src/gview.cpp src/gview.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o gview.o src/gview.cpp
+
+statusbar.o: src/statusbar.cpp src/statusbar.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o statusbar.o src/statusbar.cpp
 
 ####### Install
 
