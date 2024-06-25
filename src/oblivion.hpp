@@ -34,6 +34,11 @@ public:
 
     bool OpenImage(QString filepath = "");
     void ZoomImage(float factor);
+    void RotateImage(float angle);
+    void FlipImageV();
+    void FlipImageH();
+    void FullScreenImage();
+    void Exit();
 
 private:
     QWidget *mWidget;
@@ -41,12 +46,21 @@ private:
     QMenuBar *mMenuBar;
     StatusBar *mStatusBar;
 
-    QMenu *mFileMenu,
-          *mAboutMenu;
+    QMenu   *mFileMenu,
+            *mEditMenu,
+            *mImageMenu,
+            *mImageMenu_FlipMenu,
+            *mImageMenu_RotateMenu,
+            *mAboutMenu;
 
     QAction *mFileMenu__open,
             *mFileMenu__open_recent,
-            *mFileMenu__exit;
+            *mFileMenu__exit,
+            *mEditMenu__prefs,
+            *mImageMenu__rotate_clock,
+            *mImageMenu__rotate_anticlock,
+            *mImageMenu__flip_horizontal,
+            *mImageMenu__flip_vertical;
 
 
     void mMenuBarSetup();
@@ -54,8 +68,13 @@ private:
 
     QImage mImg;
 
-    float mGlobalFactor = 1.0f;
+    float   mGlobalZoom = 1.0f,
+            mGlobalAngle = 0.0f;
 
     GView *mView;
+
+    const float VERSION = 0.1;
+
+    bool mFullScreenMode = false;
 };
 
