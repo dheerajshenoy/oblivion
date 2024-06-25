@@ -13,6 +13,11 @@ public:
 
     bool addItem(QGraphicsItem *item);
     bool setPixmap(const QPixmap& pix);
+    bool SavePixmap(QString filename);
+    QGraphicsPixmapItem* pixitem();
+    void rotateImage(float angle);
+    QPixmap rotatePixmap(const QPixmap pixmap, qreal rotationAngle);
+
 
 protected:
     void wheelEvent(QWheelEvent *e) override;

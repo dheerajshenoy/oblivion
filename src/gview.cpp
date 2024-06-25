@@ -6,7 +6,6 @@ GView::GView(QWidget *parent)
 {
 
     mScene = new QGraphicsScene();
-    /*setTransformationAnchor(QGraphicsView::AnchorViewCenter);*/
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     setRenderHint(QPainter::Antialiasing);
     setDragMode(QGraphicsView::ScrollHandDrag);
@@ -27,7 +26,6 @@ bool GView::setPixmap(const QPixmap& pix)
 {
     if (!mPixItem)
     {
-        qDebug() << "DD";
         mPixItem = mScene->addPixmap(pix);
     }
     else {
@@ -53,6 +51,55 @@ void GView::wheelEvent(QWheelEvent *e)
     }
 
     QGraphicsView::wheelEvent(e);
+}
+
+void GView::rotateImage(float angle)
+{
+    mPixItem->setPixmap(rotatePixmap(mPixItem->pixmap(), angle));
+}
+
+QPixmap GView::rotatePixmap(const QPixmap pixmap, qreal rotationAngle)
+{
+    if (pixmap.isNull()) {
+        return QPixmap();
+    }
+
+    QTransform transform;
+    transform.rotate(rotationAngle);
+
+    QPixmap rotatedPixmap(pixmap.size());
+    rotatedPixmap.fill(Qt::transparent); // Ensure the background is transparent
+
+    QPainter painter(&rotatedPixmap);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    painter.setTransform(transform);
+    painter.drawPixmap(0, 0, pixmap);
+    painter.end();
+
+    return rotatedPixmap;
+}
+
+bool GView::SavePixmap(QString filename)
+{
+    if (mPixItem) {
+
+        QRectF bounds = mPixItem->boundingRect();
+        QImage img(bounds.size().toSize(), QImage::Format_ARGB32);
+        img.fill(Qt::transparent);
+
+        QPainter painter(&img);
+        mScene->render(&painter, QRectF(), bounds);
+        painter.end();
+
+        img.save(filename);
+    }
+
+    return false;
+}
+
+QGraphicsPixmapItem* GView::pixitem()
+{
+    return mPixItem;
 }
 
 GView::~GView()

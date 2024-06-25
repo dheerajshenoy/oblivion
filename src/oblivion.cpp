@@ -26,10 +26,6 @@ Oblivion::Oblivion(int argc, char ** argv, QWidget *parent)
 
     images.removeAt(0);
 
-    if (images.size() > 1)
-    {
-        SlideShow(images, true);
-    }
 
     this->show();
 }
@@ -63,10 +59,15 @@ void Oblivion::mMenuBarSetup()
 
     mFileMenu__open = new QAction("Open");
     mFileMenu__open_recent = new QAction("Open Recent");
+    mFileMenu__save = new QAction("Save");
     mFileMenu__exit = new QAction("Exit");
 
     connect(mFileMenu__open, &QAction::triggered, this, [=]() {
         Oblivion::OpenImage();
+    });
+
+    connect(mFileMenu__save, &QAction::triggered, this, [=]() {
+        Oblivion::SaveImage();
     });
 
     connect(mFileMenu__exit, &QAction::triggered, this, [=]() {
@@ -75,6 +76,7 @@ void Oblivion::mMenuBarSetup()
 
     mFileMenu->addAction(mFileMenu__open);
     mFileMenu->addAction(mFileMenu__open_recent);
+    mFileMenu->addAction(mFileMenu__save);
     mFileMenu->addAction(mFileMenu__exit);
 
     mEditMenu__prefs = new QAction("Preferences");
@@ -204,7 +206,7 @@ void Oblivion::RotateImage(float angle)
 {
     mGlobalAngle = angle;
 
-    mView->rotate(angle);
+    mView->rotateImage(angle);
 }
 
 void Oblivion::FlipImageH()
@@ -239,6 +241,12 @@ void Oblivion::FullScreenImage()
 
 void Oblivion::mToggleSlideShow()
 {
+
+    if (mSlideShowList.size() == 0)
+    {
+        QMessageBox::information(this, "Slideshow Error", "No slideshow images selected");
+        return;
+    }
 
     if (mSlideShowState)
     {
@@ -319,6 +327,30 @@ QStringList Oblivion::convertCharArrayToQStringList(char **charArray, int count)
 void Oblivion::Exit()
 {
     QApplication::exit();
+}
+
+bool Oblivion::SaveImage(QString filename)
+{
+    if (!filename.isEmpty())
+    {
+        mView->SavePixmap(filename);
+    }
+    else {
+        QString filename = QFileDialog::getSaveFileName(this, "Save file");
+
+        if (!filename.isEmpty())
+
+            try {
+                /*mView->grab().save(filename);*/
+                mView->SavePixmap(filename);
+            } catch (std::exception &e) {
+                QMessageBox::critical(this, "Error Saving File", "Could not save the file due to " + QString(e.what()));
+            }
+        else
+            QMessageBox::critical(this, "Error Saving File", "Could not save the file under the given filename");
+    }
+    
+    return true;
 }
 
 Oblivion::~Oblivion() {

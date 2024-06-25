@@ -40,7 +40,9 @@ public:
     void FlipImageH();
     void FullScreenImage();
     void SlideShow(QStringList imagepaths, bool loop = false);
+    bool SaveImage(QString filename = "");
     void Exit();
+
 
 
 private:
@@ -60,6 +62,7 @@ private:
 
 
     QAction *mFileMenu__open,
+            *mFileMenu__save,
             *mFileMenu__open_recent,
             *mFileMenu__exit,
             *mEditMenu__prefs,
