@@ -1,9 +1,9 @@
 #include "oblivion.hpp"
-#include "qshortcut.h"
 
-Oblivion::Oblivion(QWidget *parent)
+Oblivion::Oblivion(int argc, char ** argv, QWidget *parent)
 : QMainWindow(parent)
 {
+    mSplitter = new QSplitter(Qt::Orientation::Horizontal);
     mWidget = new QWidget();
     mLayout = new QVBoxLayout();
     mMenuBar = new QMenuBar();
@@ -22,8 +22,34 @@ Oblivion::Oblivion(QWidget *parent)
     mMenuBarSetup();
     mShortcutsSetup();
 
-    OpenImage("/home/neo/Downloads/wall.png");
+    auto images = Oblivion::convertCharArrayToQStringList(argv, argc);
+
+    images.removeAt(0);
+
+    if (images.size() > 1)
+    {
+        qDebug() << "DD";
+        SlideShow(images, true);
+    }
+
     this->show();
+}
+
+bool Oblivion::mNextImage()
+{
+    if (mSlideShowIndex < mSlideShowList.size())
+    {
+        OpenImage(mSlideShowList.at(mSlideShowIndex));
+        mSlideShowIndex++;
+        return true;
+    }
+    else if (mSlideShowLoop)
+    {
+        mSlideShowIndex = 0;
+        OpenImage(mSlideShowList.at(mSlideShowIndex));
+        return true;
+    }
+    return false;
 }
 
 void Oblivion::mMenuBarSetup()
@@ -78,10 +104,12 @@ void Oblivion::mMenuBarSetup()
     mImageMenu->addMenu(mImageMenu_FlipMenu);
 
     mAboutMenu = new QMenu("About");
+    mSlideShowMenu = new QMenu("Slideshow");
 
     mMenuBar->addMenu(mFileMenu);
     mMenuBar->addMenu(mEditMenu);
     mMenuBar->addMenu(mImageMenu);
+    mMenuBar->addMenu(mSlideShowMenu);
     mMenuBar->addMenu(mAboutMenu);
 }
 
@@ -123,7 +151,7 @@ bool Oblivion::OpenImage(QString filepath)
             mStatusBar->SetFileSize(fileinfo.size());
 
             mImg = QImage(files[0]);
-            mView->addPixmap(QPixmap::fromImage(mImg));
+            mView->setPixmap(QPixmap::fromImage(mImg));
 
             return true;
         }
@@ -139,11 +167,14 @@ bool Oblivion::OpenImage(QString filepath)
             mStatusBar->SetFileSize(fileinfo.size());
 
             mImg = QImage(filepath);
-            mView->addPixmap(QPixmap::fromImage(mImg));
+            mView->setPixmap(QPixmap::fromImage(mImg));
 
             return true;
+        } else {
+
+            QMessageBox::critical(this, "Error", QString("Unable to open the image" + fileinfo.filePath()));
+            return false;
         }
-        else return false;
     }
 
     return true;
@@ -152,7 +183,12 @@ bool Oblivion::OpenImage(QString filepath)
 void Oblivion::ZoomImage(float factor)
 {
     mGlobalZoom *= factor;
-    mView->scale(mGlobalZoom, mGlobalZoom);
+
+    if (factor < 0)
+        mView->scale(1 / factor, 1 / factor);
+    else 
+        mView->scale(factor, factor);
+
 }
 
 void Oblivion::RotateImage(float angle)
@@ -190,6 +226,52 @@ void Oblivion::FullScreenImage()
     }
 
     mFullScreenMode = !mFullScreenMode;
+}
+
+void Oblivion::mToggleSlideShow()
+{
+    mSlideShowState = !mSlideShowState;
+}
+
+void Oblivion::SlideShow(QStringList imagepaths, bool loop)
+{
+    mSlideShowState = true;
+
+    if (!mSlideShowTimer)
+        mSlideShowTimer = new QTimer();
+
+    OpenImage(imagepaths[0]);
+    mSlideShowList = imagepaths;
+
+    
+    mSlideShowTimer->setInterval(SLIDE_SHOW_INTERVAL * 1000);
+
+    if (!loop)
+    {
+        connect(mSlideShowTimer, &QTimer::timeout, this, [&]() {
+            if(!mNextImage())
+            {
+                mSlideShowTimer->stop();
+            }
+        });
+    } else {
+        connect(mSlideShowTimer, &QTimer::timeout, this, [&]() {
+            mNextImage();
+        });
+    }
+
+    mSlideShowTimer->start();
+}
+
+QStringList Oblivion::convertCharArrayToQStringList(char **charArray, int count)
+{
+    QStringList stringList;
+
+    for (int i = 0; i < count; ++i) {
+        stringList.append(QString(charArray[i]));
+    }
+
+    return stringList;
 }
 
 void Oblivion::Exit()

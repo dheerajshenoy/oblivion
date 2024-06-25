@@ -6,3 +6,5 @@
 + Fullscreen
 
 # 0.2
+
++ Slideshow

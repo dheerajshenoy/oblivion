@@ -5,24 +5,38 @@ GView::GView(QWidget *parent)
     : QGraphicsView(parent)
 {
 
+    mScene = new QGraphicsScene();
     /*setTransformationAnchor(QGraphicsView::AnchorViewCenter);*/
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-
+    setRenderHint(QPainter::Antialiasing);
     setDragMode(QGraphicsView::ScrollHandDrag);
-    setScene(&mScene);
+    setOptimizationFlags(QGraphicsView::DontSavePainterState);
+    setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    setDragMode(QGraphicsView::ScrollHandDrag);
+    setScene(mScene);
     this->show();
 }
 
 bool GView::addItem(QGraphicsItem *item)
 {
-    mScene.addItem(item);
+    mScene->addItem(item);
     return true;
 }
 
-bool GView::addPixmap(const QPixmap pix)
+bool GView::setPixmap(const QPixmap& pix)
 {
-    mScene.addPixmap(pix);
+    if (!mPixItem)
+    {
+        qDebug() << "DD";
+        mPixItem = mScene->addPixmap(pix);
+    }
+    else {
+        mPixItem->setPixmap(pix);
+        mPixItem->setPos(0, 0);
+        mScene->setSceneRect(QRectF(0, 0, pix.width(), pix.height()));
+    }
 
+    scale(1, 1);
     return true;
 }
 
