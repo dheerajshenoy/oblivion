@@ -28,7 +28,6 @@ Oblivion::Oblivion(int argc, char ** argv, QWidget *parent)
 
     if (images.size() > 1)
     {
-        qDebug() << "DD";
         SlideShow(images, true);
     }
 
@@ -106,6 +105,14 @@ void Oblivion::mMenuBarSetup()
     mAboutMenu = new QMenu("About");
     mSlideShowMenu = new QMenu("Slideshow");
 
+    mSlideShowMenu__toggle_slideshow = new QAction("Start");
+
+    mSlideShowMenu->addAction(mSlideShowMenu__toggle_slideshow);
+
+    connect(mSlideShowMenu__toggle_slideshow, &QAction::triggered, this, [&]() {
+        Oblivion::mToggleSlideShow();
+    });
+
     mMenuBar->addMenu(mFileMenu);
     mMenuBar->addMenu(mEditMenu);
     mMenuBar->addMenu(mImageMenu);
@@ -120,13 +127,15 @@ void Oblivion::mShortcutsSetup()
     *mZoomOut = new QShortcut(QKeySequence("-"), this),
     *mRotateClock = new QShortcut(QKeySequence("."), this),
     *mRotateAntiClock = new QShortcut(QKeySequence(","), this),
-    *mFullScreenImage = new QShortcut(QKeySequence("Shift+F"), this);
+    *mFullScreenImage = new QShortcut(QKeySequence("Shift+F"), this),
+    *mSlideShowToggle = new QShortcut(QKeySequence("Space"), this);
 
     connect(mZoomIn, &QShortcut::activated, this, [&]() { Oblivion::ZoomImage(1.25); });
     connect(mZoomOut, &QShortcut::activated, this, [&]() { Oblivion::ZoomImage(0.8); });
     connect(mRotateClock, &QShortcut::activated, this, [&]() { Oblivion::RotateImage(90); });
     connect(mRotateAntiClock, &QShortcut::activated, this, [&]() { Oblivion::RotateImage(-90); });
     connect(mFullScreenImage, &QShortcut::activated, this, [&]() { Oblivion::FullScreenImage(); });
+    connect(mSlideShowToggle, &QShortcut::activated, this, [&]() { Oblivion::mToggleSlideShow(); });
 }
 
 bool Oblivion::OpenImage(QString filepath)
@@ -230,19 +239,52 @@ void Oblivion::FullScreenImage()
 
 void Oblivion::mToggleSlideShow()
 {
+
+    if (mSlideShowState)
+    {
+        mSlideShowTimer->stop();
+        mStatusBar->Message("Slideshow paused", 2);
+        mSlideShowMenu__toggle_slideshow->setText("Resume");
+    }
+    else {
+        mSlideShowTimer->start();
+        mStatusBar->Message("Slideshow resumed", 2);
+        mSlideShowMenu__toggle_slideshow->setText("Pause");
+    }
+
     mSlideShowState = !mSlideShowState;
+}
+
+// FIX : handle start and stop of the timer here
+void Oblivion::mSetSlideShowState(bool state)
+{
+
+    if (state)
+    {
+        /*mSlideShowTimer->stop();*/
+        mStatusBar->Message("Slideshow paused", 2);
+        mSlideShowMenu__toggle_slideshow->setText("Resume");
+    }
+    else {
+        /*mSlideShowTimer->start();*/
+        mStatusBar->Message("Slideshow resumed", 2);
+        mSlideShowMenu__toggle_slideshow->setText("Pause");
+    }
+
+    mSlideShowState = state;
 }
 
 void Oblivion::SlideShow(QStringList imagepaths, bool loop)
 {
-    mSlideShowState = true;
+
+    mSetSlideShowState(true);
 
     if (!mSlideShowTimer)
         mSlideShowTimer = new QTimer();
 
     OpenImage(imagepaths[0]);
     mSlideShowList = imagepaths;
-
+    mSlideShowTimer = new QTimer();
     
     mSlideShowTimer->setInterval(SLIDE_SHOW_INTERVAL * 1000);
 

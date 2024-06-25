@@ -74,6 +74,7 @@ private:
     void mShortcutsSetup();
     bool mNextImage();
     void mToggleSlideShow();
+    void mSetSlideShowState(bool);
 
     QStringList convertCharArrayToQStringList(char **charArray, int count);
 

@@ -8,3 +8,4 @@
 # 0.2
 
 + Slideshow
++ Edit and save file
