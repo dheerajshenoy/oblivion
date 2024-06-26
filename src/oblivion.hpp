@@ -16,6 +16,7 @@
 #include <qt6/QtCore/QMimeType>
 
 #include <qt6/QtGui/QImage>
+#include <qt6/QtGui/QImageReader>
 #include <qt6/QtGui/QShortcut>
 #include <qt6/QtGui/QKeySequence>
 #include <qt6/QtGui/QAction>
@@ -24,7 +25,7 @@
 #include <qt6/QtCore/QFile>
 #include <qt6/QtCore/QFileInfo>
 
-#include "gview.hpp"
+#include "scrollarea.hpp"
 #include "statusbar.hpp"
 
 class Oblivion : public QMainWindow
@@ -41,6 +42,7 @@ public:
     void FullScreenImage();
     void SlideShow(QStringList imagepaths, bool loop = false);
     bool SaveImage(QString filename = "");
+    void adjustScrollBar(QScrollBar *scrollBar, double factor);
     void Exit();
 
 
@@ -86,7 +88,8 @@ private:
     float   mGlobalZoom = 1.0f,
             mGlobalAngle = 0.0f;
 
-    GView *mView;
+    QLabel *mImgLabel;
+    ScrollArea *mScrollArea;
 
     const float VERSION = 0.1;
 

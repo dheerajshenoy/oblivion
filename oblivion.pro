@@ -15,5 +15,5 @@ INCLUDEPATH += .
 #DEFINES += QT_DISABLE_DEPRECATED_UP_TO=0x060000 # disables all APIs deprecated in Qt 6.0.0 and earlier
 
 # Input
-HEADERS += src/oblivion.hpp src/utils.hpp src/gview.hpp src/statusbar.hpp
-SOURCES += src/main.cpp src/oblivion.cpp src/utils.cpp src/gview.cpp src/statusbar.cpp
+HEADERS += src/oblivion.hpp src/utils.hpp src/statusbar.hpp src/scrollarea.hpp
+SOURCES += src/main.cpp src/oblivion.cpp src/utils.cpp src/statusbar.cpp src/scrollarea.cpp

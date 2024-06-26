@@ -7,11 +7,20 @@ Oblivion::Oblivion(int argc, char ** argv, QWidget *parent)
     mWidget = new QWidget();
     mLayout = new QVBoxLayout();
     mMenuBar = new QMenuBar();
-    mView = new GView();
+    /*mView = new GView();*/
 
+    mImgLabel = new QLabel();
+    mImgLabel->setBackgroundRole(QPalette::Base);
+    mImgLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    mImgLabel->setScaledContents(true);
+
+    mScrollArea = new ScrollArea();
+
+    mScrollArea->setWidget(mImgLabel);
     mStatusBar = new StatusBar();
 
-    mLayout->addWidget(mView);
+    /*mLayout->addWidget(mView);*/
+    mLayout->addWidget(mScrollArea);
     mLayout->addWidget(mStatusBar);
 
     mWidget->setLayout(mLayout);
@@ -26,6 +35,10 @@ Oblivion::Oblivion(int argc, char ** argv, QWidget *parent)
 
     images.removeAt(0);
 
+    if (images.size() == 1)
+    {
+        OpenImage(images[0]);
+    }
 
     this->show();
 }
@@ -161,8 +174,13 @@ bool Oblivion::OpenImage(QString filepath)
             mStatusBar->SetFileType(mimetype.name());
             mStatusBar->SetFileSize(fileinfo.size());
 
-            mImg = QImage(files[0]);
-            mView->setPixmap(QPixmap::fromImage(mImg));
+
+            QImageReader reader(files[0]);
+            reader.setAutoTransform(true);
+            mImg = reader.read();
+            mImgLabel->setPixmap(QPixmap::fromImage(mImg));
+            mImgLabel->resize(mImgLabel->pixmap().size());
+            ZoomImage(1);
 
             return true;
         }
@@ -177,8 +195,9 @@ bool Oblivion::OpenImage(QString filepath)
             mStatusBar->SetFileType(mimetype.name());
             mStatusBar->SetFileSize(fileinfo.size());
 
-            mImg = QImage(filepath);
-            mView->setPixmap(QPixmap::fromImage(mImg));
+            QImageReader reader(filepath);
+            reader.setAutoTransform(true);
+            mImg = reader.read();
 
             return true;
         } else {
@@ -195,28 +214,34 @@ void Oblivion::ZoomImage(float factor)
 {
     mGlobalZoom *= factor;
 
-    if (factor < 0)
-        mView->scale(1 / factor, 1 / factor);
-    else 
-        mView->scale(factor, factor);
+    mImgLabel->resize(mGlobalZoom * mImgLabel->pixmap(Qt::ReturnByValue).size());
 
+    adjustScrollBar(mScrollArea->horizontalScrollBar(), factor);
+    adjustScrollBar(mScrollArea->verticalScrollBar(), factor);
+
+}
+
+void Oblivion::adjustScrollBar(QScrollBar *scrollBar, double factor)
+{
+    scrollBar->setValue(int(factor * scrollBar->value()
+                            + ((factor - 1) * scrollBar->pageStep()/2)));
 }
 
 void Oblivion::RotateImage(float angle)
 {
     mGlobalAngle = angle;
 
-    mView->rotateImage(angle);
+    /*mView->rotateImage(angle);*/
 }
 
 void Oblivion::FlipImageH()
 {
-    mView->scale(-1, 1);
+    /*mView->scale(-1, 1);*/
 }
 
 void Oblivion::FlipImageV()
 {
-    mView->scale(1, -1);
+    /*mView->scale(1, -1);*/
 }
 
 void Oblivion::FullScreenImage()
@@ -333,7 +358,7 @@ bool Oblivion::SaveImage(QString filename)
 {
     if (!filename.isEmpty())
     {
-        mView->SavePixmap(filename);
+        /*mView->SavePixmap(filename);*/
     }
     else {
         QString filename = QFileDialog::getSaveFileName(this, "Save file");
@@ -342,7 +367,7 @@ bool Oblivion::SaveImage(QString filename)
 
             try {
                 /*mView->grab().save(filename);*/
-                mView->SavePixmap(filename);
+                /*mView->SavePixmap(filename);*/
             } catch (std::exception &e) {
                 QMessageBox::critical(this, "Error Saving File", "Could not save the file due to " + QString(e.what()));
             }
